@@ -36,7 +36,7 @@ sort_standard(x) = sort(x)
 sort_reverse(x) = sort(x, rev=true)
 
 # Define your input generator
-input_generator(k) = rand(1:k, k)
+input_generator(k) = rand(Int, k)
 
 # Define your range
 range = 10_000:10_000:100_000
@@ -44,3 +44,32 @@ samples = 1
 
 # Run the benchmarks
 benchmark_algorithms([sort_standard, sort_reverse], input_generator, range, samples)
+
+function sum_array(a)
+    total = 0
+    for i in eachindex(a)
+        total += a[i]
+    end
+    return total
+end
+
+function unrolled_sum_array(a)
+    total = 0
+    len = length(a)
+    i = 1
+
+    # Sum pairs of elements
+    while i <= len - 1
+        total += a[i] + a[i+1]
+        i += 2
+    end
+
+    # If the array length is odd, sum the last element
+    if len % 2 != 0
+        total += a[len]
+    end
+
+    return total
+end
+
+benchmark_algorithms([sum_array, unrolled_sum_array, sum], k -> rand(k), 1000:100:2000, 1)
