@@ -1,5 +1,5 @@
 using BenchmarkTools
-using Plots
+using StatsPlots
 
 function benchmark_algorithms(functions::Vector{Function}, input_generator::Function, range::AbstractRange, samples::Int=100)
     results = Dict()
@@ -29,6 +29,43 @@ function benchmark_algorithms(functions::Vector{Function}, input_generator::Func
     ylabel!(p, "Time (ns)")
     display(p)
 end
+
+function benchmark_algorithms_boxplot(functions::Vector{Function}, input_generator::Function, range::AbstractRange, samples::Int=100)
+    results = Dict()
+
+    for f in functions
+        func_results = Vector{Vector{Float64}}()
+
+        # Benchmark for each input size in the range
+        for k in range
+            input = input_generator(k)
+            b = @benchmarkable $f($input)
+            tune!(b, samples=samples)
+
+            times = run(b).times
+            push!(func_results, times)
+        end
+
+        results[string(f)] = func_results
+    end
+
+    p = plot(legend=:outertopright)
+
+    all_results = []
+    all_labels = []
+
+    for (func_name, func_results) in results
+        push!(all_results, func_results)
+        push!(all_labels, func_name)
+    end
+
+    boxplot!(p, all_results, labels=all_labels)
+    title!(p, "Benchmark Results")
+    xlabel!(p, "Input Size")
+    ylabel!(p, "Time (ns)")
+    display(p)
+end
+
 
 
 # Define your algorithms
@@ -73,3 +110,13 @@ function unrolled_sum_array(a)
 end
 
 benchmark_algorithms([sum_array, unrolled_sum_array, sum], k -> rand(k), 1000:100:2000, 1)
+benchmark_algorithms_boxplot([sum_array, unrolled_sum_array, sum],
+                              k -> rand(k),
+                              1000:100:2000,
+                              1)
+
+
+data = [randn(100) for _ in 1:5]
+
+# Create a box plot of the data
+boxplot(data, labels = ["Sample 1" "Sample 2" "Sample 3" "Sample 4" "Sample 5"])
