@@ -2,7 +2,7 @@
 
 julia_version = "1.9.0"
 manifest_format = "2.0"
-project_hash = "d01ea9348e5c454f38eee22971df4cf1d39ae74e"
+project_hash = "19e906300db0aa3e7dff3cefc4b7b6afa6e5edf5"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -299,11 +299,40 @@ git-tree-sha1 = "aa31987c2ba8704e23c6c8ba8a4f769d5d7e4f91"
 uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.10+0"
 
+[[deps.GAP]]
+deps = ["Downloads", "GAP_jll", "GAP_lib_jll", "GAP_pkg_juliainterface_jll", "GMP_jll", "Libdl", "MacroTools", "Markdown", "Pkg", "REPL", "Random", "Scratch"]
+git-tree-sha1 = "aac1111f0e129827a8379627dbb2e366483f020d"
+uuid = "c863536a-3901-11e9-33e7-d5cd0df7b904"
+version = "0.9.6"
+
+[[deps.GAP_jll]]
+deps = ["Artifacts", "GMP_jll", "JLLWrappers", "Libdl", "Pkg", "Readline_jll", "Zlib_jll"]
+git-tree-sha1 = "224115f6a29bd7bf3b7e43a37b5cbfdd9409793d"
+uuid = "5cd7a574-2c56-5be2-91dc-c8bc375b9ddf"
+version = "400.1200.200+1"
+
+[[deps.GAP_lib_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "473b619163e30d9cc58d4a8f9d412e6ea8910fcf"
+uuid = "de1ad85e-c930-5cd4-919d-ccd3fcafd1a3"
+version = "400.1201.200+0"
+
+[[deps.GAP_pkg_juliainterface_jll]]
+deps = ["Artifacts", "GAP_jll", "GAP_lib_jll", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "6d9c4a1eabb872f1a4029f3fd194899d8f40803d"
+uuid = "ba154793-3a7d-51ee-8800-e295b0cf7374"
+version = "0.800.202+1"
+
 [[deps.GLFW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]
 git-tree-sha1 = "d972031d28c8c8d9d7b41a536ad7bb0c2579caca"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.3.8+0"
+
+[[deps.GMP_jll]]
+deps = ["Artifacts", "Libdl"]
+uuid = "781609d7-10c4-51f6-84f2-b8444358ff6d"
+version = "6.2.1+2"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Pkg", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "UUIDs", "p7zip_jll"]
@@ -611,6 +640,12 @@ git-tree-sha1 = "0877504529a3e5c3343c6f8b4c0381e57e4387e4"
 uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
 version = "1.0.2"
 
+[[deps.Ncurses_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "e3fb71f3c971fdc8523f9ef3906691124f3048a2"
+uuid = "68e3532b-a499-55ff-9963-d1c0c0748b3a"
+version = "6.2.0+0"
+
 [[deps.NearestNeighbors]]
 deps = ["Distances", "StaticArrays"]
 git-tree-sha1 = "2c3726ceb3388917602169bed973dbc97f1b51a8"
@@ -791,6 +826,12 @@ weakdeps = ["FixedPointNumbers"]
 
     [deps.Ratios.extensions]
     RatiosFixedPointNumbersExt = "FixedPointNumbers"
+
+[[deps.Readline_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Ncurses_jll", "Pkg"]
+git-tree-sha1 = "7cfd44e2889fcabf8ee80dad89bccb3756d4e778"
+uuid = "05236dd9-4125-5232-aa7c-9ec0c9b2c25a"
+version = "8.1.1+1"
 
 [[deps.RecipesBase]]
 deps = ["PrecompileTools"]
