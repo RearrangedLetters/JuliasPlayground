@@ -8,6 +8,7 @@ using InteractiveUtils
 begin
 	using Symbolics
 	using SymbolicUtils
+	using SymbolicUtils.Rewriters
 end
 
 # ╔═╡ 5025c274-b84d-485a-87d3-52b328e4f017
@@ -81,6 +82,11 @@ end
 # ╔═╡ 0984c45a-3d2a-44db-b3c6-a3bae03e606d
 md"oftype(x, y): Convert y to the type of x i.e. convert(typeof(x), y)"
 
+# ╔═╡ 23bfd748-1560-45f5-a048-cf957f5d5f33
+md"""
+## Exercise: Matrix with numberes and parameters times a vector
+"""
+
 # ╔═╡ d4485cc6-88ca-4cc8-ad54-f7a856480a39
 md"""
 # Equations
@@ -147,13 +153,147 @@ md"""
 ## Rewriters
 
 A rewriter is any callable object which takes an expression and returns an expression or nothing. If nothing is returned that means there was no changes applicable to the input expression. The Rules we created above are rewriters.
+
+There are different ways to combine rules into a more complex rewriter. Quite often it is however desirable to apply rules until no further change occurs. This can be done by chaining all the rules and then packing it into a Fixpoint. Again, rewriters can be applied like functions:
 """
 
 # ╔═╡ 07c6b3a2-7d0b-4942-8492-8318eeaa4047
+chain = Chain([sqexpand, trigpyid])
 
+# ╔═╡ 5a00e7d6-4c27-4c99-8181-6bd356f66a3d
+cas = Fixpoint(chain)
 
 # ╔═╡ 23bab297-da00-4268-bb02-e58b5adc07db
+expr
 
+# ╔═╡ d1d55ca6-fe00-4685-9fe7-ed9495d6a1fc
+cas(expr)
+
+# ╔═╡ e34ee114-7d00-49d1-ac39-29d1d74762cc
+md"""
+### Back in Symbolic.jl
+
+We can use simplify together with a rewriter:
+"""
+
+# ╔═╡ 368811e0-acb0-4b63-a0cc-b4873c1559c7
+simplify(expr; rewriter=chain)
+
+# ╔═╡ cac624c0-19e7-4536-9c04-c959b5c03f48
+md"""
+### Segmented Variables
+
+A Segment variable is written as ~~x and matches zero or more expressions in the function call.
+
+Example:
+
+This implements the distributive property of multiplication: +(~~ys) matches expressions like a + b, a+b+c and so on. On the RHS ~~ys presents as any old julia array.
+"""
+
+# ╔═╡ 90649fee-3349-4dff-8eaf-288ccef41900
+r = @rule ~x * +((~~ys)) => sum(map(y-> ~x * y, ~~ys));
+
+# ╔═╡ 1595a724-9a22-4c0e-9fc5-555bc26e1495
+md"""
+# Questions
+
+* What existing rewriters are there?
+* Is it possible/desirable to introduce rules for groups, e.g. the first isomorphism theorem?
+* How can custom datatypes be included in an expression/rule?
+"""
+
+# ╔═╡ 07c44ec9-519a-4eb2-9d90-982625a2bc14
+md"""
+# Derivatives
+"""
+
+# ╔═╡ e5650e0d-2c70-4902-8485-d7466849a24c
+∂ₓ = Differential(x)
+
+# ╔═╡ 890bacbb-8855-4b24-b3b0-9cbcd832846d
+g(x,y,z) = x^2 + sin(x+y) - z
+
+# ╔═╡ ee29ef3d-902d-4e1b-a6b6-0b5a677a7ba6
+g(x, y, z)
+
+# ╔═╡ a7dbe24d-db57-45b5-946d-a32adb3e55a1
+Symbolics.expand_derivatives(∂ₓ(g(x,y,z)))
+
+# ╔═╡ 95a3376d-79f5-4124-805e-794b80183013
+md"""
+## Questions
+
+* How to symbolically compute the jacobian?
+"""
+
+# ╔═╡ 7688c13f-1fb7-4ea4-ad80-65910ecdaee7
+md"""
+# Proving Equalities with Symbolics.jl
+"""
+
+# ╔═╡ ada51455-cd3a-4356-84a8-44167f5c279e
+md"""
+Goal: Determine if $a = b$ for two expressions $a$ and $b$ with respect to some rewriting rules.
+
+My first (and only idea) is to compute a normal form of $a$ and of $b$ and compare those for equality. Let's see if such a comparison is possible:
+"""
+
+# ╔═╡ 4b8a61f4-9b2d-42df-b5ea-c8fdfaeea039
+@syms β γ η κ
+
+# ╔═╡ ae164d3d-16e5-477b-b2fc-118ea9fb12fb
+r(2 * (β + γ + η))
+
+# ╔═╡ 9ba3d600-fdd6-42a6-bc60-fd62183277d0
+ex_1 = β^2 + γ^3
+
+# ╔═╡ 10269ec6-ed97-4c84-b523-af0636949a93
+ex_2 = η^2 + κ^3
+
+# ╔═╡ 5a4e9ed5-4ca8-4058-aed4-cfd9de860f00
+isequal(ex_1, ex_2)
+
+# ╔═╡ 984924f1-77f4-40b7-922b-b3498cccb658
+md"but"
+
+# ╔═╡ ade6875e-fbc2-446f-a244-d6ba0d057f06
+ex_3 = γ^3 + β^2
+
+# ╔═╡ 88764342-ebf3-48dd-935b-9f5b10ca231e
+isequal(ex_1, ex_3)
+
+# ╔═╡ 7f250e1b-28c5-47a7-9743-3c4bab83ac0d
+bin3 = @rule (~x)^2 - 1*(~y)^2 => (~x -1*~y) * (~x + ~y)
+
+# ╔═╡ c15b9dbb-d6ab-4904-ad7a-9f7187e92f94
+negfactor = @rule -1*~x + -1*~y => -1*(~x + ~y)
+
+# ╔═╡ 93b4ca66-ff7b-47c4-bbd5-cadfb2945983
+@warn "It is nevessary to write -1 * ~x instead of -(~x). Similarly with subtractions."
+
+# ╔═╡ 1da0a0b6-000d-4669-a74d-f67ef177042b
+rewriter = Fixpoint(Chain([sqexpand, trigpyid, bin3, negfactor]))
+
+# ╔═╡ a3bc88cb-53ec-4ebc-87a4-8c1cea8c8a3e
+ex_v1 = (β^2 - 1) // (β - sin(η)^2 - cos(η)^2)
+
+# ╔═╡ 1b780d20-ee20-477e-a794-47651eb3ca4e
+ex_v2 = β + 1
+
+# ╔═╡ 1127578d-3f94-41f9-a94c-7445c373d234
+negfactor(- sin(η)^2 - cos(η)^2)
+
+# ╔═╡ 101c54af-fd00-40fa-85f1-f949086a7d9e
+simplify(ex_v1; rewriter = rewriter)
+
+# ╔═╡ f9296d2e-0988-44e6-9dc7-4228dbc77dc7
+ex_aux = β - sin(η)^2 - cos(η)^2
+
+# ╔═╡ e56fd8a5-498c-4fd2-922e-113c040b1554
+trigpyid(negfactor(ex_aux - β))
+
+# ╔═╡ 575a61c8-d32a-4fd5-9374-40e30cb89df6
+expand(2(β + β - η))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1013,6 +1153,7 @@ version = "17.4.0+0"
 # ╟─cd3e0323-ce30-4bc6-a924-f115254fa9d9
 # ╠═f880c859-7f71-4fdc-9f3b-de950be7c51d
 # ╟─0984c45a-3d2a-44db-b3c6-a3bae03e606d
+# ╟─23bfd748-1560-45f5-a048-cf957f5d5f33
 # ╟─d4485cc6-88ca-4cc8-ad54-f7a856480a39
 # ╟─8116272f-22ee-4259-b2b7-5fa04a1dba42
 # ╟─f77d5662-de84-4847-9ea5-beee4dc791da
@@ -1024,14 +1165,48 @@ version = "17.4.0+0"
 # ╠═2efa3460-e200-43cb-bd86-138bcf1d55a6
 # ╠═9f88178c-4cf8-477f-8961-1e2f53a0818d
 # ╟─201c1521-2fe7-44b9-800e-87315dd67121
-# ╟─74652837-362a-4436-9422-5280bfd05108
-# ╟─fbb2cb1a-a1c9-4606-8023-008bed05b966
+# ╠═74652837-362a-4436-9422-5280bfd05108
+# ╠═fbb2cb1a-a1c9-4606-8023-008bed05b966
 # ╟─206be29e-9c61-410c-a71d-032dda8facc5
 # ╠═b0449252-bc84-42d1-aef7-c1388aa22ea6
 # ╠═401d6213-46c7-443b-85d9-54b664e41eae
 # ╠═13bbc519-6bbc-4d5c-88c8-b7a4f60c239a
 # ╟─358f4d1a-37d6-4a3d-9d8f-3f4daa2b5f6d
 # ╠═07c6b3a2-7d0b-4942-8492-8318eeaa4047
+# ╠═5a00e7d6-4c27-4c99-8181-6bd356f66a3d
 # ╠═23bab297-da00-4268-bb02-e58b5adc07db
+# ╠═d1d55ca6-fe00-4685-9fe7-ed9495d6a1fc
+# ╟─e34ee114-7d00-49d1-ac39-29d1d74762cc
+# ╠═368811e0-acb0-4b63-a0cc-b4873c1559c7
+# ╟─cac624c0-19e7-4536-9c04-c959b5c03f48
+# ╠═90649fee-3349-4dff-8eaf-288ccef41900
+# ╠═ae164d3d-16e5-477b-b2fc-118ea9fb12fb
+# ╟─1595a724-9a22-4c0e-9fc5-555bc26e1495
+# ╟─07c44ec9-519a-4eb2-9d90-982625a2bc14
+# ╠═e5650e0d-2c70-4902-8485-d7466849a24c
+# ╠═890bacbb-8855-4b24-b3b0-9cbcd832846d
+# ╠═ee29ef3d-902d-4e1b-a6b6-0b5a677a7ba6
+# ╠═a7dbe24d-db57-45b5-946d-a32adb3e55a1
+# ╟─95a3376d-79f5-4124-805e-794b80183013
+# ╟─7688c13f-1fb7-4ea4-ad80-65910ecdaee7
+# ╟─ada51455-cd3a-4356-84a8-44167f5c279e
+# ╠═4b8a61f4-9b2d-42df-b5ea-c8fdfaeea039
+# ╟─9ba3d600-fdd6-42a6-bc60-fd62183277d0
+# ╟─10269ec6-ed97-4c84-b523-af0636949a93
+# ╠═5a4e9ed5-4ca8-4058-aed4-cfd9de860f00
+# ╟─984924f1-77f4-40b7-922b-b3498cccb658
+# ╟─ade6875e-fbc2-446f-a244-d6ba0d057f06
+# ╠═88764342-ebf3-48dd-935b-9f5b10ca231e
+# ╠═7f250e1b-28c5-47a7-9743-3c4bab83ac0d
+# ╠═c15b9dbb-d6ab-4904-ad7a-9f7187e92f94
+# ╟─93b4ca66-ff7b-47c4-bbd5-cadfb2945983
+# ╠═1da0a0b6-000d-4669-a74d-f67ef177042b
+# ╠═a3bc88cb-53ec-4ebc-87a4-8c1cea8c8a3e
+# ╟─1b780d20-ee20-477e-a794-47651eb3ca4e
+# ╠═1127578d-3f94-41f9-a94c-7445c373d234
+# ╠═101c54af-fd00-40fa-85f1-f949086a7d9e
+# ╠═f9296d2e-0988-44e6-9dc7-4228dbc77dc7
+# ╠═e56fd8a5-498c-4fd2-922e-113c040b1554
+# ╠═575a61c8-d32a-4fd5-9374-40e30cb89df6
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
